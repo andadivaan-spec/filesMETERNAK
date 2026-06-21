@@ -5,6 +5,8 @@ from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
+from chatbot import chatbot_bp
+app.register_blueprint(chatbot_bp)
 DB_PATH = 'meternak.db'
 
 # ─── LOAD MODELS ─────────────────────────────────────────────────────────────
