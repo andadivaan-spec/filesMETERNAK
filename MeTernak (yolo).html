@@ -35,7 +35,6 @@
             overflow: hidden;
         }
 
-        /* Sidebar Navigation Layout */
         .sidebar {
             width: 260px;
             background: var(--bg-sidebar);
@@ -57,7 +56,6 @@
 
         .logo-img {
             width: 100%;
-            /* Sesuai Poin 1: Diubah agar pas di dalam batas lebar sidebar */
             height: auto;
             object-fit: cover;
             mix-blend-mode: multiply;
@@ -91,7 +89,6 @@
             font-weight: 600;
         }
 
-        /* Main Workspace Content Portals */
         .main-workspace {
             flex: 1;
             padding: 30px;
@@ -119,7 +116,6 @@
             display: flex;
         }
 
-        /* Grid Framework */
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -143,7 +139,6 @@
             font-weight: bold;
         }
 
-        /* Interactive Inputs (48px+ Touch Target Form fields) */
         .large-input {
             width: 100%;
             height: 50px;
@@ -195,7 +190,6 @@
             min-height: 250px;
         }
 
-        /* Camera Stream Element Frame */
         .video-box {
             width: 100%;
             height: 160px;
@@ -223,7 +217,6 @@
             border-radius: 4px;
         }
 
-        /* Persistent Floating SaCo Chatbot Engine Overlay */
         .saco-widget {
             position: fixed;
             bottom: 30px;
@@ -241,7 +234,6 @@
             bottom: 24px;
             right: 24px;
             background: transparent;
-            /* Sesuai Poin 2: Warna background aslinya dirubah agar transparan murni */
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -268,15 +260,8 @@
         }
 
         @keyframes floatUp {
-            0% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-
-            100% {
-                opacity: 0;
-                transform: translateY(-40px) scale(1.3);
-            }
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-40px) scale(1.3); }
         }
 
         .chat-window {
@@ -345,29 +330,37 @@
             border-radius: 8px;
             padding: 0 12px;
             outline: none;
+        }
 
-            @media (max-width: 768px) {
-                body {
-                    flex-direction: column;
-                    overflow: auto;
-                }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(44, 33, 23, 0.45);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
 
-                .sidebar {
-                    width: 100%;
-                    height: auto;
-                    padding: 12px;
-                    flex-direction: row;
-                    flex-wrap: wrap;
-                }
+        .modal-box {
+            background: #FFFFFF;
+            border-radius: 12px;
+            padding: 24px;
+            width: 280px;
+            text-align: center;
+            border: 1px solid var(--border-light);
+        }
 
-                .main-workspace {
-                    padding: 12px;
-                }
-
-                .metrics-grid {
-                    grid-template-columns: 1fr;
-                }
-            }
+        @media (max-width: 768px) {
+            body { flex-direction: column; height: auto; overflow: auto; }
+            .sidebar { width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; padding: 12px; }
+            .logo-area { width: 70px; }
+            .nav-group { margin-top: 0; display: flex; gap: 8px; flex: 1; overflow-x: auto; }
+            .main-workspace { padding: 14px; }
+            .metrics-grid { grid-template-columns: 1fr; }
+            .chat-window { width: 88vw; right: 0; }
+            .cow-avatar-btn { width: 60px; height: 60px; bottom: 16px; right: 16px; }
+            table { font-size: 12px; }
         }
     </style>
 </head>
@@ -383,6 +376,8 @@
                 <button class="nav-item active" onclick="switchTab(event, 'dashboardPane')">Dashboard
                     Pemantauan</button>
                 <button class="nav-item" onclick="switchTab(event, 'pengaturanDataPane')">Pengaturan Data Sapi</button>
+                <button class="nav-item" onclick="switchTab(event, 'historiSiklusPane'); loadHistoriSiklus();">Histori
+                    Siklus Sapi</button>
             </div>
         </div>
         <div style="font-size: 11px; color: var(--accent-tan); font-weight: 600;" id="sidebarSessionStatus">ID Sapi:
@@ -492,7 +487,34 @@
                 </section>
             </div>
         </div>
+
+        <div id="historiSiklusPane" class="view-pane">
+            <header class="top-navbar"><h2>Histori Siklus Sapi</h2></header>
+            <section class="card" style="padding:0; overflow-x:auto;">
+                <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                    <thead>
+                        <tr style="background:#FAF8F3; text-align:left;">
+                            <th style="padding:12px 16px; border-bottom:1px solid var(--border-light);">ID Sapi</th>
+                            <th style="padding:12px 16px; border-bottom:1px solid var(--border-light);">Siklus Terakhir</th>
+                            <th style="padding:12px 16px; border-bottom:1px solid var(--border-light);">Hari Sebelum Estrus</th>
+                            <th style="padding:12px 16px; border-bottom:1px solid var(--border-light);">IB Terakhir</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historiSiklusBody">
+                        <tr><td colspan="4" style="padding:16px; text-align:center; color:#8e8278;">Belum ada data sapi tercatat.</td></tr>
+                    </tbody>
+                </table>
+            </section>
+        </div>
     </main>
+
+    <div class="modal-overlay" id="detectionModal">
+        <div class="modal-box">
+            <div id="modalResultLabel" style="font-size:15px; font-weight:bold; color:var(--primary-brown); margin-bottom:8px;"></div>
+            <div id="modalResultAcc" style="font-size:13px; color:#7c7067; margin-bottom:16px;"></div>
+            <button class="btn-action" onclick="document.getElementById('detectionModal').style.display='none'">Tutup</button>
+        </div>
+    </div>
 
     <div class="saco-widget">
         <div class="chat-window" id="sacoChat">
@@ -521,17 +543,17 @@
     </div>
 
     <script>
-        // Local State Object Dataset Schema Representation
         let currentSession = {
             farmerName: 'Peternak Umum',
             farmAddress: 'Kandang Utama',
             cattleId: 'Belum Diatur',
-            cattleAge: 'Belum Diatur', // Sesuai Poin 3: State penampung umur sapi baru
+            cattleAge: 'Belum Diatur',
             currentMucusColor: '',
             lstmTimeSeries: []
         };
 
-        // Tab Navigation Window Controller Logic Route
+        const BACKEND_URL = 'http://localhost:5000';
+
         function switchTab(event, targetPaneId) {
             document.querySelectorAll('.view-pane').forEach(p => p.classList.remove('active-pane'));
             document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -539,12 +561,11 @@
             if (event) event.currentTarget.classList.add('active');
         }
 
-        // 1. Modul Pengaturan Data - Update Dataset Profiles Mapping Method
         function updateDatasetIdentity() {
             const name = document.getElementById('regFarmerName').value.trim();
             const address = document.getElementById('regFarmAddress').value.trim();
             const cid = document.getElementById('regCattleId').value.trim();
-            const cage = document.getElementById('regCattleAge').value.trim(); // Sesuai Poin 3: Membaca input umur
+            const cage = document.getElementById('regCattleAge').value.trim();
 
             if (!name || !address || !cid || !cage) {
                 alert("Peringatan: Mohon isi seluruh parameter kolom identitas agar pengiriman dataset ke backend valid!");
@@ -554,20 +575,18 @@
             currentSession.farmerName = name;
             currentSession.farmAddress = address;
             currentSession.cattleId = cid;
-            currentSession.cattleAge = cage; // Sesuai Poin 3: Menyimpan nilai umur
+            currentSession.cattleAge = cage;
 
-            // Sync structural parameters across navbar fields
             document.getElementById('sidebarSessionStatus').innerText = `ID Sapi: ${cid} (${cage})`;
             document.getElementById('dashHeadline').innerText = `Pemantauan Pembiakan: ${cid}`;
             document.getElementById('dashSubline').innerText = `Pemilik: ${name} | Lokasi: ${address} | Umur: ${cage}`;
 
-            alert(`✓ Dataset Identitas [${cid}] Berhasil Diperbarui secara lokal dan siap disinkronisasikan!`);
+            alert(`Dataset Identitas [${cid}] Berhasil Diperbarui secara lokal dan siap disinkronisasikan!`);
             switchTab(null, 'dashboardPane');
             document.querySelectorAll('.nav-item')[0].classList.add('active');
             document.querySelectorAll('.nav-item')[1].classList.remove('active');
         }
 
-        // 2. YOLO Camera Stream Preview Control Handler
         async function startWebcam() {
             const video = document.getElementById('webcamView');
             try {
@@ -579,8 +598,6 @@
             }
         }
 
-        // ── YOLO ONNX REAL INFERENCE ──────────────────────────────────────────
-        // CLASS MAP: 0=lendir_bunting_kuning_keruh, 1=lendir_transparan_bening, 2=lendir_darah
         const YOLO_CLASS_MAP = {
             0: { color: 'kuning', label: 'Terdeteksi: lendir kuning keruh (abnormal)', bg: 'var(--danger-red)', log: 'Peringatan Sistem: Lendir berwarna kuning. Sapi terindikasi bunting atau mengalami gangguan medis.' },
             1: { color: 'transparant', label: 'Terdeteksi: lendir transparan (estrus hari 1)', bg: 'var(--success-green)', log: 'Hari 1: Karakteristik lendir terdeteksi transparan bening encer. Siklus awal estrus terekam.' },
@@ -589,7 +606,6 @@
 
         let yoloSession = null;
 
-        // Load ONNX model — place best.onnx in same folder as this HTML
         async function loadYoloModel() {
             const tag = document.getElementById('yoloResultTag');
             try {
@@ -604,7 +620,6 @@
             }
         }
 
-        // Preprocess image → Float32 tensor [1,3,640,640] normalized 0-1
         function preprocessImage(source) {
             const canvas = document.getElementById('yoloCanvas');
             canvas.width = 640; canvas.height = 640;
@@ -613,18 +628,16 @@
             const { data } = ctx.getImageData(0, 0, 640, 640);
             const input = new Float32Array(3 * 640 * 640);
             for (let i = 0; i < 640 * 640; i++) {
-                input[i] = data[i * 4] / 255.0; // R
-                input[i + 640 * 640] = data[i * 4 + 1] / 255.0; // G
-                input[i + 640 * 640 * 2] = data[i * 4 + 2] / 255.0; // B
+                input[i] = data[i * 4] / 255.0;
+                input[i + 640 * 640] = data[i * 4 + 1] / 255.0;
+                input[i + 640 * 640 * 2] = data[i * 4 + 2] / 255.0;
             }
             return new ort.Tensor('float32', input, [1, 3, 640, 640]);
         }
 
-        // Parse YOLOv8 output [1, 7, 8400] → best detection
         function parseYoloOutput(outputData, confThreshold = 0.3) {
-            // YOLOv8 output shape: [1, nc+4, 8400] → transpose to [8400, nc+4]
-            const numBoxes = outputData.dims[2];         // 8400
-            const numAttrs = outputData.dims[1];         // 4 + nc
+            const numBoxes = outputData.dims[2];
+            const numAttrs = outputData.dims[1];
             const nc = numAttrs - 4;
             const data = outputData.data;
 
@@ -642,7 +655,12 @@
             return { cls: bestCls, conf: bestConf };
         }
 
-        // Apply result to UI (shared by upload + frame scan)
+        function showDetectionModal(label, conf) {
+            document.getElementById('modalResultLabel').innerText = label;
+            document.getElementById('modalResultAcc').innerText = 'Akurasi: ' + (conf * 100).toFixed(1) + '%';
+            document.getElementById('detectionModal').style.display = 'flex';
+        }
+
         function applyDetectionResult(cls, conf) {
             const tag = document.getElementById('yoloResultTag');
             if (cls === -1 || !YOLO_CLASS_MAP[cls]) {
@@ -655,10 +673,10 @@
             tag.innerHTML = `${info.label} <span style="font-size:10px;">(${(conf * 100).toFixed(1)}%)</span>`;
             tag.style.background = info.bg;
             updateLstmTimeSeriesHistory(info.log);
+            showDetectionModal(info.label, conf);
             runHybridInferencePipeline();
         }
 
-        // Upload image → run inference
         async function runYoloOnUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -686,10 +704,9 @@
                 }
             };
             img.src = URL.createObjectURL(file);
-            event.target.value = ''; // reset so same file can be re-uploaded
+            event.target.value = '';
         }
 
-        // Capture webcam frame → run inference
         async function runYoloOnFrame() {
             const video = document.getElementById('webcamView');
             const tag = document.getElementById('yoloResultTag');
@@ -718,10 +735,8 @@
             }
         }
 
-        // Keep old function name so any other references don't break
         function simulateMucusDetection() { runYoloOnFrame(); }
 
-        // 4. Time-Series Tracking Engine Sequence Logger (LSTM Logger Framework)
         function updateLstmTimeSeriesHistory(logEntryText) {
             const container = document.getElementById('lstmLogContainer');
             if (currentSession.lstmTimeSeries.length === 0) container.innerHTML = '';
@@ -735,7 +750,6 @@
             currentSession.lstmTimeSeries.push({ timestamp: timeLabel, detail: logEntryText });
         }
 
-        // 5. Automated ESP32 Telemetry Loop Driver Emulation Handler
         function initEsp32TelemetryStream() {
             setInterval(() => {
                 const generatedOhm = Math.floor(Math.random() * (560 - 340 + 1)) + 340;
@@ -744,7 +758,6 @@
             }, 3000);
         }
 
-        // ================= PIPELINE INTERPRETER: INTEGRASI HYBRID MODEL (RANDOM FOREST) =================
         function runHybridInferencePipeline() {
             const mucus = currentSession.currentMucusColor;
             const temperatureInput = document.getElementById('dashTemperature').value;
@@ -780,7 +793,7 @@
                 } else {
                     panel.style.background = "#fff8e1";
                     panel.style.borderColor = "var(--warning-amber)";
-                    outputText.innerHTML = "Anomali Suhu<br><span style='font-size:12px; font-weight:normal;'>Lendir Hari ke-3 Terbaca Benar, Namun Nilai Suhu (${currentTemp}°C) Berada di Luar Kurva Subur.</span>";
+                    outputText.innerHTML = `Anomali Suhu<br><span style='font-size:12px; font-weight:normal;'>Lendir Hari ke-3 Terbaca Benar, Namun Nilai Suhu (${currentTemp}°C) Berada di Luar Kurva Subur.</span>`;
                     outputText.style.color = "var(--warning-amber)";
                 }
             }
@@ -788,10 +801,6 @@
             sendDataToBackend();
         }
 
-        // Alamat backend Python (Flask). Ganti jika dideploy ke server lain.
-        const BACKEND_URL = 'http://localhost:5000';
-
-        // Mengirim parameter ke backend Python untuk disimpan dan dihitung probabilitas LSTM-nya
         async function sendDataToBackend() {
             const payload = {
                 cattle_id: currentSession.cattleId,
@@ -821,9 +830,25 @@
             }
         }
 
-        // 6. Interactive Chat Interface Widgets & Head Petting Handler Logic 
+        async function loadHistoriSiklus() {
+            const body = document.getElementById('historiSiklusBody');
+            try {
+                const res = await fetch(BACKEND_URL + '/api/cows/history');
+                const data = await res.json();
+                if (!data.length) return;
+                body.innerHTML = data.map(r => `
+                    <tr>
+                        <td style="padding:10px 16px; border-bottom:1px solid var(--border-light);">${r.cattle_id}</td>
+                        <td style="padding:10px 16px; border-bottom:1px solid var(--border-light);">${r.last_record || '-'}</td>
+                        <td style="padding:10px 16px; border-bottom:1px solid var(--border-light);">${r.estimated_day ?? '-'}</td>
+                        <td style="padding:10px 16px; border-bottom:1px solid var(--border-light);">${r.last_ib || 'Belum IB'}</td>
+                    </tr>`).join('');
+            } catch (err) {
+                console.warn('Gagal memuat histori:', err.message);
+            }
+        }
+
         function toggleChatWindow() {
-            // Animasi Love Dipicu Dulu Sebelum Chat Window Terbuka Sesuai Aturan Jeda Waktu
             const heart = document.getElementById('heartIcon');
             heart.style.display = 'block';
             heart.style.animation = 'none';
@@ -875,7 +900,6 @@
             chatLogBody.scrollTop = chatLogBody.scrollHeight;
         }
 
-        // Main Launcher Initialization Trigger
         window.onload = function () {
             initEsp32TelemetryStream();
             loadYoloModel();
