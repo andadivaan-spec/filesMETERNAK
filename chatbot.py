@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from google import genai
+import google.generativeai as genai
 import os
 
 chatbot_bp = Blueprint('chatbot', __name__)
